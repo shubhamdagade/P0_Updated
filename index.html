@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>One Lodha Place | Air Quality Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="420"> 
+
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --gold: #9e801b;
+            --text-greyish: #777777; 
+            --glass-bg: rgba(255, 255, 255, 0.35);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --faint-labelcard: rgba(68, 68, 68, 0.7);
+            --faint-label: rgba(68, 68, 68, 0.8);
+            --visible-grey: rgba(180, 180, 180, 0.5);
+        }
+
+        body, html { 
+            margin: 0; padding: 0;
+            height: 100vh; width: 100vw;
+            font-family: 'Jost', sans-serif;
+            background: url('background.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-greyish);
+            overflow: hidden;
+        }
+
+        .dashboard-wrapper {
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: space-between;
+            padding: 6vh 0; box-sizing: border-box;
+        }
+
+        .header-section {
+            display: flex; flex-direction: column;
+            gap: 4vh; align-items: center;
+        }
+
+        .header-top, .footer-text { 
+            font-size: 2.5vh; font-weight: 500;
+            text-transform: uppercase; text-align: center;
+        }
+
+        .main-headline { 
+            font-size: 4vh; font-weight: 400;
+            text-transform: uppercase;
+            word-spacing: 0.2vw; letter-spacing: 0.2vw;
+            margin: 0;
+        }
+
+        #status-text { font-weight: 600; }
+
+        .card-container {
+            display: flex;
+            gap: 5vw;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .card-container.single {
+            justify-content: center;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border-radius: 2.5vh;
+            width: 50vh; height: 50vh;
+            display: flex; flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            padding: 3vh 2vw;
+            border: 0.2vh solid var(--glass-border);
+            box-shadow: 0 4vh 8vh rgba(0,0,0,0.1);
+        }
+
+        #external-card.hidden {
+            display: none;
+        }
+
+        .card-label {
+            font-size: 3vh;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        .card-label b {
+            font-weight: 600;
+            color: var(--faint-labelcard);
+        }
+
+        .aqi-value {
+            font-size: 15vh;
+            font-weight: 200;
+            color: var(--gold);
+            line-height: 0.7;
+            margin: 0;
+        }
+
+        .metrics-box {
+            display: flex;
+            width: 100%;
+            border: 0.25vh solid var(--visible-grey);
+            border-radius: 2vh;
+            padding: 2.5vh 0;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .metric-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .metric-item + .metric-item {
+            border-left: 0.25vh solid var(--visible-grey);
+        }
+
+        .metric-label {
+            font-size: 2.5vh;
+            text-transform: uppercase;
+            color: var(--faint-label);
+        }
+
+        .metric-val {
+            font-size: 3vh;
+            font-weight: 500;
+            color: var(--gold);
+            white-space: nowrap;
+        }
+
+        .metric-unit {
+            font-size: 1em;
+            margin-left: 0.5vh;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-wrapper">
+
+    <div class="header-section">
+        <div class="header-top">Live AQI</div>
+        <div class="main-headline">
+            Indoor Air Quality is <b id="status-text">Detecting...</b>
+        </div>
+    </div>
+
+    <div class="card-container" id="card-container">
+
+        <div class="glass-card" id="internal-card">
+            <div class="card-label"><b>Internal</b> AQI</div>
+            <div class="aqi-value" id="in-aqi">--</div>
+
+            <div class="metrics-box">
+                <div class="metric-item">
+                    <span class="metric-label">PM2.5</span>
+                    <span class="metric-val" id="in-pm25">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">PM10</span>
+                    <span class="metric-val" id="in-pm10">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card" id="external-card">
+            <div class="card-label"><b>External</b> AQI</div>
+            <div class="aqi-value" id="out-aqi">--</div>
+
+            <div class="metrics-box">
+                <div class="metric-item">
+                    <span class="metric-label">PM2.5</span>
+                    <span class="metric-val" id="out-pm25">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">PM10</span>
+                    <span class="metric-val" id="out-pm10">--</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-container">
+        <div class="footer-text">One Lodha Place, Mumbai</div>
+    </div>
+
+</div>
+
+<script>
+    const K_KEY = 'nomjPNZHYkGzzP5YIJePqI2cUON67v1pj9JPXb8BpcgnC5VX';
+    const GOOGLE_KEY = 'AIzaSyD-sKAUFhaCGFENHqjlyrQfhbgOplhxy-Q';
+    const LAT = 19.0000, LON = 72.8200;
+
+    const DEVICE_IDS = ['f8d67086-a38d-4d2e-ac64-3b2cdbfd9964'];
+
+    function calcAQI(pm) {
+        if (pm <= 30) return Math.round(pm * 50 / 30);
+        if (pm <= 60) return Math.round(50 + (pm - 30) * (50 / 30));
+        if (pm <= 90) return Math.round(100 + (pm - 60) * (100 / 30));
+        if (pm <= 120) return Math.round(200 + (pm - 90) * (100 / 30));
+        if (pm <= 250) return Math.round(300 + (pm - 120) * (100 / 130));
+        return 500;
+    }
+
+    async function updateData() {
+        try {
+            let internalAQI = null;
+            let externalAQI = null;
+
+            // INTERNAL
+            const fetches = DEVICE_IDS.map(id =>
+                fetch(`https://api.kaiterra.com/v1/devices/${id}/top?key=${K_KEY}`).then(r => r.json())
+            );
+
+            const results = await Promise.allSettled(fetches);
+            let pm25 = [], pm10 = [];
+
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value.data) {
+                    const d = res.value.data;
+                    pm25.push(d.find(x => x.param === 'rpm25c').points[0].value);
+                    pm10.push(d.find(x => x.param === 'rpm10c').points[0].value);
+                }
+            });
+
+            if (pm25.length) {
+                const low25 = Math.min(...pm25);
+                const low10 = Math.min(...pm10);
+
+                internalAQI = calcAQI(low25);
+
+                document.getElementById('in-aqi').innerText = internalAQI;
+                document.getElementById('in-pm25').innerHTML =
+                    Math.round(low25) + '<span class="metric-unit">µg/m³</span>';
+                document.getElementById('in-pm10').innerHTML =
+                    Math.round(low10) + '<span class="metric-unit">µg/m³</span>';
+
+                document.getElementById('status-text').innerText =
+                    internalAQI <= 15 ? "PRISTINE" :
+                    internalAQI <= 30 ? "EXCEPTIONAL" :
+                    internalAQI <= 45 ? "EXCELLENT" :
+                    internalAQI <= 60 ? "VERY GOOD" : "GOOD";
+            }
+
+            // EXTERNAL
+            const gRes = await fetch(
+                `https://airquality.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_KEY}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: { latitude: LAT, longitude: LON },
+                        extraComputations: ["LOCAL_AQI", "POLLUTANT_CONCENTRATION"]
+                    })
+                }
+            );
+
+            const gData = await gRes.json();
+
+            if (gData.indexes) {
+                const idx = gData.indexes.find(i => i.code === 'ind_cpcb') || gData.indexes[0];
+                externalAQI = idx.aqi;
+                document.getElementById('out-aqi').innerText = externalAQI;
+
+                const p25 = gData.pollutants.find(p => p.code === 'pm25');
+                const p10 = gData.pollutants.find(p => p.code === 'pm10');
+
+                if (p25)
+                    document.getElementById('out-pm25').innerHTML =
+                        Math.round(p25.concentration.value) + '<span class="metric-unit">µg/m³</span>';
+
+                if (p10)
+                    document.getElementById('out-pm10').innerHTML =
+                        Math.round(p10.concentration.value) + '<span class="metric-unit">µg/m³</span>';
+            }
+
+            // VISIBILITY LOGIC
+            const container = document.getElementById('card-container');
+            const externalCard = document.getElementById('external-card');
+
+            if (
+                internalAQI !== null &&
+                externalAQI !== null &&
+                Math.abs(internalAQI - externalAQI) >= 50
+            ) {
+                externalCard.classList.remove('hidden');
+                container.classList.remove('single');
+            } else {
+                externalCard.classList.add('hidden');
+                container.classList.add('single');
+            }
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    updateData();
+    setInterval(updateData, 300000);
+</script>
+
+</body>
+</html>

@@ -125,33 +125,6 @@
             color: var(--gold);
             line-height: 0.7;
         }
-
-        .metrics-box {
-            display: flex;
-            width: 100%;
-            border: 0.25vh solid var(--visible-grey);
-            border-radius: 2vh;
-            padding: 2.5vh 0;
-        }
-
-        .metric-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .metric-label {
-            font-size: 2.5vh;
-            text-transform: uppercase;
-            color: var(--faint-label);
-        }
-
-        .metric-val {
-            font-size: 3vh;
-            font-weight: 500;
-            color: var(--gold);
-        }
     </style>
 </head>
 
@@ -160,7 +133,7 @@
 <!-- VIDEO OVERLAY -->
 <div id="video-overlay">
     <video id="warning-video" loop muted playsinline preload="auto">
-        <source src="https://drive.google.com/uc?export=download&id=1viFP58rFoptqE2oalfbE64E7jgSMATeF" type="video/mp4">
+        <source src="https://drive.google.com/file/d/1viFP58rFoptqE2oalfbE64E7jgSMATeF/view" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 </div>
@@ -193,7 +166,11 @@
     const K_KEY = 'nomjPNZHYkGzzP5YIJePqI2cUON67v1pj9JPXb8BpcgnC5VX';
     const GOOGLE_KEY = 'AIzaSyD-sKAUFhaCGFENHqjlyrQfhbgOplhxy-Q';
     const LAT = 19.0000, LON = 72.8200;
-    const DEVICE_IDS = ['f8d67086-a38d-4d2e-ac64-3b2cdbfd9964'];
+
+    /* ✅ SINGLE DEVICE ID ONLY */
+    const DEVICE_IDS = [
+        'f8d67086-a38d-4d2e-ac64-3b2cdbfd9964'
+    ];
 
     function calcAQI(pm) {
         if (pm <= 30) return Math.round(pm * 50 / 30);

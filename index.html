@@ -5,12 +5,13 @@
     <title>One Lodha Place | Air Quality Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="420">
+
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --gold: #9e801b;
-            --text-greyish: #777777; 
+            --text-greyish: #777777;
             --glass-bg: rgba(255, 255, 255, 0.35);
             --glass-border: rgba(255, 255, 255, 0.4);
             --faint-labelcard: rgba(68, 68, 68, 0.7);
@@ -18,20 +19,19 @@
             --visible-grey: rgba(180, 180, 180, 0.5);
         }
 
-        body, html { 
-            margin: 0; padding: 0;
-            height: 100vh; width: 100vw;
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
             font-family: 'Jost', sans-serif;
-            background: url('background.jpg') no-repeat center center fixed; 
+            background: url('background.jpg') no-repeat center center fixed;
             background-size: cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-greyish);
             overflow: hidden;
+            color: var(--text-greyish);
         }
 
-        /* Video Overlay */
+        /* VIDEO OVERLAY */
         #video-overlay {
             display: none;
             position: fixed;
@@ -46,8 +46,10 @@
             object-fit: cover;
         }
 
+        /* MAIN UI */
         .dashboard-wrapper {
-            width: 100vw; height: 100vh;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -76,7 +78,9 @@
             letter-spacing: 0.2vw;
         }
 
-        #status-text { font-weight: 600; }
+        #status-text {
+            font-weight: 600;
+        }
 
         .card-container {
             display: flex;
@@ -102,14 +106,18 @@
             box-shadow: 0 4vh 8vh rgba(0,0,0,0.1);
         }
 
-        #external-card { display: none; }
+        #external-card {
+            display: none;
+        }
 
         .card-label {
             font-size: 3vh;
             text-transform: uppercase;
         }
 
-        .card-label b { color: var(--faint-labelcard); }
+        .card-label b {
+            color: var(--faint-labelcard);
+        }
 
         .aqi-value {
             font-size: 15vh;
@@ -144,12 +152,6 @@
             font-weight: 500;
             color: var(--gold);
         }
-
-        .footer-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
     </style>
 </head>
 
@@ -157,13 +159,13 @@
 
 <!-- VIDEO OVERLAY -->
 <div id="video-overlay">
-    <video id="warning-video" loop muted autoplay playsinline>
+    <video id="warning-video" loop muted playsinline preload="auto">
         <source src="https://drive.google.com/uc?export=download&id=1viFP58rFoptqE2oalfbE64E7jgSMATeF" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 </div>
 
-<!-- MAIN UI -->
+<!-- MAIN DASHBOARD -->
 <div class="dashboard-wrapper" id="main-ui">
     <div class="header-section">
         <div class="header-top">Live AQI</div>
@@ -176,37 +178,15 @@
         <div class="glass-card">
             <div class="card-label"><b>Internal</b> AQI</div>
             <div class="aqi-value" id="in-aqi">--</div>
-            <div class="metrics-box">
-                <div class="metric-item">
-                    <span class="metric-label">PM2.5</span>
-                    <span class="metric-val" id="in-pm25">--</span>
-                </div>
-                <div class="metric-item" style="border-left: 0.25vh solid var(--visible-grey);">
-                    <span class="metric-label">PM10</span>
-                    <span class="metric-val" id="in-pm10">--</span>
-                </div>
-            </div>
         </div>
 
         <div class="glass-card" id="external-card">
             <div class="card-label"><b>External</b> AQI</div>
             <div class="aqi-value" id="out-aqi">--</div>
-            <div class="metrics-box">
-                <div class="metric-item">
-                    <span class="metric-label">PM2.5</span>
-                    <span class="metric-val" id="out-pm25">--</span>
-                </div>
-                <div class="metric-item" style="border-left: 0.25vh solid var(--visible-grey);">
-                    <span class="metric-label">PM10</span>
-                    <span class="metric-val" id="out-pm10">--</span>
-                </div>
-            </div>
         </div>
     </div>
 
-    <div class="footer-container">
-        <div class="footer-text">One Lodha Place, Mumbai</div>
-    </div>
+    <div class="footer-text">One Lodha Place, Mumbai</div>
 </div>
 
 <script>
@@ -226,10 +206,12 @@
 
     async function updateData() {
         try {
-            let indoorAQI = 0, outdoorAQI = 0;
+            let indoorAQI = 0;
+            let outdoorAQI = 0;
 
             const fetches = DEVICE_IDS.map(id =>
-                fetch(`https://api.kaiterra.com/v1/devices/${id}/top?key=${K_KEY}`).then(r => r.json())
+                fetch(`https://api.kaiterra.com/v1/devices/${id}/top?key=${K_KEY}`)
+                    .then(r => r.json())
             );
 
             const results = await Promise.allSettled(fetches);
@@ -242,8 +224,7 @@
             });
 
             if (pm25.length) {
-                const min25 = Math.min(...pm25);
-                indoorAQI = calcAQI(min25);
+                indoorAQI = calcAQI(Math.min(...pm25));
                 document.getElementById('in-aqi').innerText = indoorAQI;
                 document.getElementById('status-text').innerText =
                     indoorAQI <= 15 ? "PRISTINE" :
@@ -277,11 +258,15 @@
             if (indoorAQI > 50) {
                 overlay.style.display = 'block';
                 ui.style.display = 'none';
-                video.play();
+
+                video.currentTime = 0;
+                video.load();
+                video.play().catch(err => console.log("Video play blocked", err));
             } else {
                 overlay.style.display = 'none';
                 ui.style.display = 'flex';
                 video.pause();
+
                 document.getElementById('external-card').style.display =
                     Math.abs(outdoorAQI - indoorAQI) > 50 ? 'flex' : 'none';
             }

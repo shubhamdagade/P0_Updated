@@ -2,161 +2,305 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Air Quality Dashboard | One Lodha Place</title>
+    <title>One Lodha Place | Air Quality Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta http-equiv="refresh" content="420">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --gold: #9e801b;
-           --text-greyish: #777777; 
+            --text-greyish: #777777; 
             --glass-bg: rgba(255, 255, 255, 0.35);
             --glass-border: rgba(255, 255, 255, 0.4);
+            --faint-labelcard: rgba(68, 68, 68, 0.7);
+            --faint-label: rgba(68, 68, 68, 0.8);
+            --visible-grey: rgba(180, 180, 180, 0.5);
         }
-        
+
         body, html { 
-            margin: 0; padding: 0; height: 100vh; width: 100vw;
+            margin: 0; padding: 0;
+            height: 100vh; width: 100vw;
             font-family: 'Jost', sans-serif;
-            background: #1a1a1a url('background.jpg') no-repeat center center fixed; 
+            background: url('background.jpg') no-repeat center center fixed; 
             background-size: cover;
-            display: flex; flex-direction: column; align-items: center;
-            color: var(--text-greyish); overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-greyish);
+            overflow: hidden;
         }
- 
-        /* Video Overlays */
+
+        /* Video Overlay */
         #video-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: black; z-index: 1000;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 1000;
         }
-        #warning-video, #yt-player { width: 100%; height: 100%; object-fit: cover; border: none; }
- 
-        /* Admin Panel */
-        #admin-panel {
-            display: none; position: fixed; bottom: 10vh; background: white; 
-            padding: 20px; border-radius: 12px; z-index: 2000; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4); width: 340px; text-align: center;
+
+        #video-overlay video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        #admin-panel input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
-        #admin-panel button { padding: 8px 15px; cursor: pointer; border: none; border-radius: 4px; margin: 3px; }
- 
-        /* UI Structure */
+
         .dashboard-wrapper {
-            width: 100vw; height: 100vh; display: flex; flex-direction: column; 
-            align-items: center; justify-content: space-between; padding: 6vh 0; box-sizing: border-box;
+            width: 100vw; height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6vh 0;
+            box-sizing: border-box;
         }
-        .main-headline { font-size: 4vh; font-weight: 400; text-transform: uppercase; text-align: center; letter-spacing: 0.2vw; }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4vh;
+            align-items: center;
+        }
+
+        .header-top, .footer-text {
+            font-size: 2.5vh;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .main-headline {
+            font-size: 4vh;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.2vw;
+        }
+
         #status-text { font-weight: 600; }
-        .card-container { display: flex; flex-direction: row; gap: 5vw; justify-content: center; align-items: center; width: 100%; flex-grow: 1; }
-        .glass-card { background: var(--glass-bg); backdrop-filter: blur(25px); border-radius: 2.5vh; width: 50vh; height: 50vh; display: flex; flex-direction: column; justify-content: space-around; align-items: center; border: 0.2vh solid var(--glass-border); }
-        .aqi-value { font-size: 15vh; font-weight: 200; color: var(--gold); line-height: 0.7; }
-        .footer-text { font-size: 2.5vh; text-transform: uppercase; cursor: pointer; padding: 20px; }
+
+        .card-container {
+            display: flex;
+            gap: 5vw;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border-radius: 2.5vh;
+            width: 50vh;
+            height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            padding: 3vh 2vw;
+            border: 0.2vh solid var(--glass-border);
+            box-shadow: 0 4vh 8vh rgba(0,0,0,0.1);
+        }
+
+        #external-card { display: none; }
+
+        .card-label {
+            font-size: 3vh;
+            text-transform: uppercase;
+        }
+
+        .card-label b { color: var(--faint-labelcard); }
+
+        .aqi-value {
+            font-size: 15vh;
+            font-weight: 200;
+            color: var(--gold);
+            line-height: 0.7;
+        }
+
+        .metrics-box {
+            display: flex;
+            width: 100%;
+            border: 0.25vh solid var(--visible-grey);
+            border-radius: 2vh;
+            padding: 2.5vh 0;
+        }
+
+        .metric-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .metric-label {
+            font-size: 2.5vh;
+            text-transform: uppercase;
+            color: var(--faint-label);
+        }
+
+        .metric-val {
+            font-size: 3vh;
+            font-weight: 500;
+            color: var(--gold);
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
+
 <body>
- 
-    <div id="video-overlay">
-        <video id="warning-video" loop muted playsinline><source id="video-src" src=""></video>
-        <div id="yt-player"></div>
-    </div>
- 
-    <div id="admin-panel">
-        <h3 style="margin:0; color: #333;">Change Video Source</h3>
-        <input type="text" id="new-video-url" placeholder="Paste YouTube, Drive, or MP4 link">
-        <div style="display: flex; justify-content: center;">
-            <button onclick="saveVideo()" style="background: var(--gold); color: white;">Save</button>
-            <button onclick="resetVideo()" style="background: #eee;">Reset to Default</button>
-            <button onclick="closeAdmin()" style="background: #333; color: white;">Close</button>
+
+<!-- VIDEO OVERLAY -->
+<div id="video-overlay">
+    <video id="warning-video" loop muted autoplay playsinline>
+        <source src="https://drive.google.com/uc?export=download&id=1viFP58rFoptqE2oalfbE64E7jgSMATeF" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<!-- MAIN UI -->
+<div class="dashboard-wrapper" id="main-ui">
+    <div class="header-section">
+        <div class="header-top">Live AQI</div>
+        <div class="main-headline">
+            Indoor Air Quality is <b id="status-text">Detecting...</b>
         </div>
     </div>
- 
-    <div class="dashboard-wrapper" id="main-ui">
-        <div class="header-top" style="font-size: 2.5vh;">Live AQI</div>
-        <div class="main-headline">Indoor Air Quality is <b id="status-text">...</b></div>
- 
-        <div class="card-container">
-            <div class="glass-card">
-                <div style="font-size:3vh"><b>Internal</b> AQI</div>
-                <div class="aqi-value" id="in-aqi">--</div>
+
+    <div class="card-container">
+        <div class="glass-card">
+            <div class="card-label"><b>Internal</b> AQI</div>
+            <div class="aqi-value" id="in-aqi">--</div>
+            <div class="metrics-box">
+                <div class="metric-item">
+                    <span class="metric-label">PM2.5</span>
+                    <span class="metric-val" id="in-pm25">--</span>
+                </div>
+                <div class="metric-item" style="border-left: 0.25vh solid var(--visible-grey);">
+                    <span class="metric-label">PM10</span>
+                    <span class="metric-val" id="in-pm10">--</span>
+                </div>
             </div>
         </div>
- 
-        <div class="footer-text" ondblclick="toggleAdmin()">One Lodha Place, Mumbai</div>
+
+        <div class="glass-card" id="external-card">
+            <div class="card-label"><b>External</b> AQI</div>
+            <div class="aqi-value" id="out-aqi">--</div>
+            <div class="metrics-box">
+                <div class="metric-item">
+                    <span class="metric-label">PM2.5</span>
+                    <span class="metric-val" id="out-pm25">--</span>
+                </div>
+                <div class="metric-item" style="border-left: 0.25vh solid var(--visible-grey);">
+                    <span class="metric-label">PM10</span>
+                    <span class="metric-val" id="out-pm10">--</span>
+                </div>
+            </div>
+        </div>
     </div>
- 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
-        // 1. CONFIGURATION & DEFAULT LINK
-        const DEFAULT_VIDEO = "https://drive.google.com/file/d/1viFP58rFoptqE2oalfbE64E7jgSMATeF/view?usp=sharing";
-        
-        let ytPlayer, isYouTube = false;
- 
-        // 2. SMART CONVERTER
-        function formatVideoURL(url) {
-            if (!url) return "";
-            // Handle Google Drive
-            if (url.includes('drive.google.com')) {
-                const idMatch = url.match(/\/d\/([^/]+)/);
-                if (idMatch) return `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
+
+    <div class="footer-container">
+        <div class="footer-text">One Lodha Place, Mumbai</div>
+    </div>
+</div>
+
+<script>
+    const K_KEY = 'nomjPNZHYkGzzP5YIJePqI2cUON67v1pj9JPXb8BpcgnC5VX';
+    const GOOGLE_KEY = 'AIzaSyD-sKAUFhaCGFENHqjlyrQfhbgOplhxy-Q';
+    const LAT = 19.0000, LON = 72.8200;
+    const DEVICE_IDS = [
+        'd17c469a-1db3-4c73-85ba-8402e658f600',
+        'dd871a66-1d78-4f0f-b4a2-8b145d9b42f7',
+        'c7b40131-0924-4bdd-82dd-f2643847b39e',
+        '424782d5-5528-43e4-8320-786dac9b62f2',
+        'e484e715-2fea-4480-8b66-1f07e02980fa',
+        '796ebfee-564a-4361-b7d1-90f86c9297ed'
+    ];
+
+    function calcAQI(pm) {
+        if (pm <= 30) return Math.round(pm * 50 / 30);
+        if (pm <= 60) return Math.round(50 + (pm - 30) * (50 / 30));
+        if (pm <= 90) return Math.round(100 + (pm - 60) * (100 / 30));
+        if (pm <= 120) return Math.round(200 + (pm - 90) * (100 / 30));
+        if (pm <= 250) return Math.round(300 + (pm - 120) * (100 / 130));
+        return 500;
+    }
+
+    async function updateData() {
+        try {
+            let indoorAQI = 0, outdoorAQI = 0;
+
+            const fetches = DEVICE_IDS.map(id =>
+                fetch(`https://api.kaiterra.com/v1/devices/${id}/top?key=${K_KEY}`).then(r => r.json())
+            );
+
+            const results = await Promise.allSettled(fetches);
+            let pm25 = [];
+
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value.data) {
+                    pm25.push(res.value.data.find(x => x.param === 'rpm25c').points[0].value);
+                }
+            });
+
+            if (pm25.length) {
+                const min25 = Math.min(...pm25);
+                indoorAQI = calcAQI(min25);
+                document.getElementById('in-aqi').innerText = indoorAQI;
+                document.getElementById('status-text').innerText =
+                    indoorAQI <= 15 ? "PRISTINE" :
+                    indoorAQI <= 30 ? "EXCEPTIONAL" :
+                    indoorAQI <= 45 ? "EXCELLENT" :
+                    indoorAQI <= 60 ? "VERY GOOD" : "GOOD";
             }
-            return url;
-        }
- 
-        function getYTID(url) {
-            const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
- 
-        // 3. INITIALIZATION
-        function onYouTubeIframeAPIReady() {
-            const currentLink = localStorage.getItem('customVideo') || DEFAULT_VIDEO;
-            const ytID = getYTID(currentLink);
-            if (ytID) {
-                isYouTube = true;
-                ytPlayer = new YT.Player('yt-player', {
-                    videoId: ytID,
-                    playerVars: { 'autoplay': 1, 'mute': 1, 'controls': 0, 'loop': 1, 'playlist': ytID }
-                });
+
+            const gRes = await fetch(
+                `https://airquality.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_KEY}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: { latitude: LAT, longitude: LON },
+                        extraComputations: ["LOCAL_AQI"]
+                    })
+                }
+            );
+
+            const gData = await gRes.json();
+            if (gData.indexes) {
+                outdoorAQI = (gData.indexes.find(i => i.code === 'ind_cpcb') || gData.indexes[0]).aqi;
+                document.getElementById('out-aqi').innerText = outdoorAQI;
             }
-        }
- 
-        window.onload = function() {
-            const currentLink = localStorage.getItem('customVideo') || DEFAULT_VIDEO;
-            const formatted = formatVideoURL(currentLink);
-            if (!getYTID(currentLink)) {
-                document.getElementById('video-src').src = formatted;
-                document.getElementById('warning-video').load();
-            }
-        };
- 
-        // 4. ADMIN FUNCTIONS
-        function toggleAdmin() { document.getElementById('admin-panel').style.display = 'block'; }
-        function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
-        function saveVideo() {
-            const val = document.getElementById('new-video-url').value;
-            if (val) { localStorage.setItem('customVideo', val); location.reload(); }
-        }
-        function resetVideo() { localStorage.removeItem('customVideo'); location.reload(); }
- 
-        // 5. AQI LOGIC (Simplified for Demo)
-        async function updateData() {
-            // Placeholder: Replace with your actual Kaiterra/Google fetch logic
-            let inAQI = 55; // Set to > 50 to test the video immediately
-            
-            document.getElementById('in-aqi').innerText = inAQI;
-            const vOv = document.getElementById('video-overlay');
-            const mUI = document.getElementById('main-ui');
- 
-            if (inAQI > 50) {
-                vOv.style.display = 'block'; mUI.style.display = 'none';
-                if (isYouTube && ytPlayer.playVideo) ytPlayer.playVideo();
-                else document.getElementById('warning-video').play();
+
+            const video = document.getElementById('warning-video');
+            const overlay = document.getElementById('video-overlay');
+            const ui = document.getElementById('main-ui');
+
+            if (indoorAQI > 50) {
+                overlay.style.display = 'block';
+                ui.style.display = 'none';
+                video.play();
             } else {
-                vOv.style.display = 'none'; mUI.style.display = 'flex';
-                if (isYouTube && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
-                else document.getElementById('warning-video').pause();
+                overlay.style.display = 'none';
+                ui.style.display = 'flex';
+                video.pause();
+                document.getElementById('external-card').style.display =
+                    Math.abs(outdoorAQI - indoorAQI) > 50 ? 'flex' : 'none';
             }
+
+        } catch (e) {
+            console.error(e);
         }
-        updateData();
-    </script>
+    }
+
+    updateData();
+    setInterval(updateData, 300000);
+</script>
+
 </body>
 </html>

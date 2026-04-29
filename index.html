@@ -3,31 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>One Lodha Place | Air Quality Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="420"> 
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold: #9e801b;
-            --text-greyish: #777777; 
-            --glass-bg: rgba(255, 255, 255, 0.35);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --faint-labelcard: rgba(68, 68, 68, 0.7);
+            /* Color Palette */
+            --text-grey: #646464; 
+            --text-indoor-num: #656565; 
+            --text-outdoor-num: #999999;
+            --status-green: #45A631;
+            --lodha-gold: #9e801b;
             --faint-label: rgba(68, 68, 68, 0.8);
-            --visible-grey: rgba(180, 180, 180, 0.5);
+            
+            /* Transparency Settings */
+            --card-bg: rgba(255, 255, 255, 0.3); /* 70% Transparent Card */
+            --sensor-bg: rgba(255, 255, 255, 0.7); /* 30% Transparent Sensor Box */
         }
-        
-        body, html { 
+        body, html {
             margin: 0; padding: 0; height: 100vh; width: 100vw;
-            font-family: 'Jost', sans-serif;
-            background: url('background.jpg') no-repeat center center fixed; 
-            background-size: cover;
-            display: flex; flex-direction: column; align-items: center;
-            color: var(--text-greyish);
+            font-family: 'Inter', sans-serif;
+            background: url('bg.jpg') no-repeat center center fixed; 
+            background-size: cover; 
             overflow: hidden;
-        }
- 
-        /* Video Overlay Styling */
+            display: flex; align-items: center;
+            cursor:none;
+        }  
+        
+         /* Video Overlay Styling */
         #video-overlay {
             display: none;
             position: fixed;
@@ -36,130 +37,138 @@
             z-index: 1000;
         }
         #warning-video { width: 100%; height: 100%; object-fit: cover; }
- 
-        .dashboard-wrapper {
-            width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: space-between; 
-            padding: 6vh 0; box-sizing: border-box;
-        }
- 
-        .header-section {
-            display: flex; flex-direction: column;
-            gap: 4vh; align-items: center;
-        }
- 
-        .header-top, .footer-text { 
-            font-size: 2.5vh; font-weight: 500;
-            text-transform: uppercase; text-align: center;
-        }
- 
-        .main-headline { 
-            font-size: 4vh; font-weight: 400; 
-            text-transform: uppercase; text-align: center;
-            word-spacing: 0.2vw; letter-spacing: 0.2vw;
-            margin: 0;
-        }
-        #status-text { font-weight: 600; }
- 
-        .card-container { 
-            display: flex; flex-direction: row; gap: 5vw; 
-            justify-content: center; align-items: center;
-            width: 100%; flex-grow: 1; 
-        }
- 
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border-radius: 2.5vh; 
-            width: 50vh; height: 50vh;
-            display: flex; flex-direction: column; 
-            justify-content: space-around; align-items: center; 
-            padding: 3vh 2vw;
-            border: 0.2vh solid var(--glass-border);
-            box-sizing: border-box;
-            box-shadow: 0 4vh 8vh rgba(0,0,0,0.1);
-        }
- 
-        .card-label { font-size: 3vh; text-transform: uppercase; font-weight: 400; }
-        .card-label b { font-weight: 600; color: var(--faint-labelcard); }
- 
-        .aqi-value { font-size: 15vh; font-weight: 200; color: var(--gold); line-height: 0.7; margin: 0; }
- 
-        .metrics-box {
-            display: flex; width: 100%; 
-            border: 0.25vh solid var(--visible-grey); 
-            border-radius: 2vh; padding: 2.5vh 0;
-            background: rgba(255,255,255,0.05);
-        }
- 
-        .metric-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .metric-label { font-size: 2.5vh; text-transform: uppercase; color: var(--faint-label); margin-bottom: 0.2vh; }
-        .metric-val { font-size: 3vh; font-weight: 500; color: var(--gold); white-space: nowrap; }
-        .metric-unit { font-size: 1em; margin-left: 0.5vh; }
- 
-        .footer-container { display: flex; align-items: center; justify-content: center; flex-grow: 0.2; }
         
-        /* Utility class to hide cards */
-        .hidden-card { display: none !important; }
+        /* Subtle Background Curves matching Figma */
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 100% 100%, #F2F2F2 0%, #FFFFFF 70%);
+            z-index: -1;
+        }
+        .dashboard-container {
+            display: flex; width: 100%; height: 100%;
+            padding: 0 8vw; box-sizing: border-box;
+            align-items: center; justify-content: space-between;
+        }
+        /* LEFT SIDE: Headline with dynamic wrapping */
+        .text-panel { 
+            flex: 0 0 55%; 
+        }
+        .live-tag {
+            font-size: 3vh; font-weight: 500; text-transform: uppercase;
+            letter-spacing: 0.1vw; color: var(--text-grey); margin-bottom: 4vh;
+        }
+        .headline {
+            font-size: 6vh; font-weight: 400; 
+            color: var(--text-grey); 
+            line-height: 1.1; margin: 0; letter-spacing: 0.05vw;
+             white-space: nowrap;   /* Add this */
+        }
+        .status-word {
+            font-weight: 600; color: var(--status-green); 
+            display: inline; 
+            text-transform: uppercase;
+            padding-left: 0.1vw;
+            white-space: nowrap;   /* Add this */
+        }
+        /* RIGHT SIDE: Proportionate Cards */
+        .cards-panel {
+            flex: 0 0 28vw; 
+            display: flex; 
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4vh;
+            justify-content: center;      
+            padding: 5vh 0;               
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+            transform: translateX(20%); /* Add this line */
+          
+        }
+        .card {
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px);
+            width: 50vh; height: 50vh; 
+            padding: 3vh 2vw;
+            border-radius: 3.5vh; 
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center; box-sizing: border-box;
+            box-shadow: 0 2vh 5vh rgba(0,0,0,0.02);
+             margin: 0;    /* ensure no extra margin */
+        }
+        .location-label {
+            font-size: 3vh; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.15vw; color: var(--text-grey);margin-bottom: 3vh;
+        }
+        .aqi-number {
+            font-size: 13vh; font-weight: 200; 
+            color: var(--text-grey); 
+            margin: 0.5vh 0; letter-spacing: -0.7vh; line-height: 1;
+        }
+        /* SENSOR BOX with 30% Transparency Background */
+        .metrics-grid {
+            display: flex; background: var(--sensor-bg);
+            border-radius: 2.5vh; margin-top: 3.5vh; padding: 2.2vh 0;
+        }
+        .metric-block { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .m-label { font-size: 2.5vh; font-weight: 500; color: var(--text-grey); text-transform: uppercase; }
+        .m-val { font-size: 3vh; font-weight: 500; color: var(--text-grey); margin-top: 0.3vh; }
+        .m-unit { font-size: 3vh; margin-left: 0.2vw; font-weight: 500; }
+        .v-divider { width: 1px; background: rgba(0,0,0,0.08); height: 4vh; align-self: center; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body>
- 
-    <div id="video-overlay">
+<body id="main-ui">
+  
+   <div id="video-overlay">
         <video id="warning-video" loop muted playsinline>
             <source src="OLPJanuary.mp4" type="video/mp4">
         </video>
     </div>
- 
-    <div class="dashboard-wrapper" id="main-ui">
-        <div class="header-section">
-            <div class="header-top">Live AQI</div>
-            <div class="main-headline">Indoor Air Quality is <b id="status-text">Detecting...</b></div>
+    <div class="bg-gradient"></div>
+    <div class="dashboard-container" id="dashboard-wrapper">
+        <div class="text-panel">
+            <div class="live-tag">Live AQI</div>
+            <h1 class="headline">Indoor air quality is&nbsp;<span class="status-word" id="status-text">Excellent</span></h1>
         </div>
- 
-        <div class="card-container">
-            <div class="glass-card" id="internal-card">
-                <div class="card-label"><b>Internal</b> AQI</div>
-                <div class="aqi-value" id="in-aqi">--</div>
-                <div class="metrics-box">
-                    <div class="metric-item">
-                        <span class="metric-label">PM2.5</span>
-                        <span class="metric-val" id="in-pm25">--</span>
+        <div class="cards-panel">
+            <div class="card" id="internal-card">
+                <div class="location-label">One Lodha Place</div>
+                <div class="aqi-number" id="in-aqi">--</div>
+                <div class="metrics-grid">
+                    <div class="metric-block">
+                        <span class="m-label">PM 2.5</span>
+                        <span class="m-val"><span id="in-pm25">--</span></span>
                     </div>
-                    <div class="metric-item" style="border-left: 0.25vh solid var(--visible-grey);">
-                        <span class="metric-label">PM10</span>
-                        <span class="metric-val" id="in-pm10">--</span>
+                    <div class="v-divider"></div>
+                    <div class="metric-block">
+                        <span class="m-label">PM 10</span>
+                        <span class="m-val"><span id="in-pm10">--</span></span>
                     </div>
                 </div>
             </div>
- 
-            <div class="glass-card" id="external-card">
-                <div class="card-label"><b>External</b> AQI</div>
-                <div class="aqi-value" id="out-aqi">--</div>
-                <div class="metrics-box">
-                    <div class="metric-item">
-                        <span class="metric-label">PM2.5</span>
-                        <span class="metric-val" id="out-pm25">--</span>
+            <div class="card" id="external-card">
+                <div class="location-label">Worli </div>
+                <div class="aqi-number" id="out-aqi">--</div>
+                <div class="metrics-grid">
+                    <div class="metric-block">
+                        <span class="m-label">PM 2.5</span>
+                        <span class="m-val"><span id="out-pm25">--</span></span>
                     </div>
-                    <div class="metric-item" style="border-left: 0.25vh solid var(--visible-grey);">
-                        <span class="metric-label">PM10</span>
-                        <span class="metric-val" id="out-pm10">--</span>
+                    <div class="v-divider"></div>
+                    <div class="metric-block">
+                        <span class="m-label">PM 10</span>
+                        <span class="m-val"><span id="out-pm10">--</span></span>
                     </div>
                 </div>
             </div>
-        </div>
- 
-        <div class="footer-container">
-            <div class="footer-text">One Lodha Place, Mumbai</div>
         </div>
     </div>
- 
     <script>
         const K_KEY = 'nomjPNZHYkGzzP5YIJePqI2cUON67v1pj9JPXb8BpcgnC5VX';
-        const GOOGLE_KEY = 'AIzaSyD-sKAUFhaCGFENHqjlyrQfhbgOplhxy-Q'; 
+        const GOOGLE_KEY = 'AIzaSyCoDosnEp6Hs4fz4eR4fTw9D9xsvhUAEx8'; 
         const LAT = 19.0000, LON = 72.8200;
-        const DEVICE_IDS = ['f8d67086-a38d-4d2e-ac64-3b2cdbfd9964'];
+        const DEVICE_IDS = ['0d7dab01-e1c1-42f2-b266-9bd80694e4a1', 'db410241-f3de-401e-a569-473de7c0ceb3', '910d75c5-eedd-4e0c-b4f3-38436eb7aab8', '1b90f659-463e-46f7-8741-bf2509845187', 'cb56dee8-dc39-4888-98bb-e8c2e5e36890', '7cb9a5be-e47d-4c7c-9b30-8d880699f72c','02ef3916-9526-4713-8a3e-55b528789d74','22a54044-b202-4cdd-94b5-dc83fecb909f'];
  
         function calcAQI(pm) {
             if (pm <= 30) return Math.round(pm * 50 / 30);
@@ -168,13 +177,13 @@
             if (pm <= 120) return Math.round(200 + (pm - 90) * (100 / 30));
             if (pm <= 250) return Math.round(300 + (pm - 120) * (100 / 130));
             return 500;
-        }
+       }
  
         async function updateData() {
             try {
                 let inAQI = 0, outAQI = 0;
                 
-                // --- Internal Sensors ---
+                // --- Internal Sensors (Kaiterra) ---
                 const fetches = DEVICE_IDS.map(id => fetch(`https://api.kaiterra.com/v1/devices/${id}/top?key=${K_KEY}`).then(r => r.json()));
                 const results = await Promise.allSettled(fetches);
                 let pm25List = [], pm10List = [];
@@ -193,14 +202,14 @@
                     inAQI = calcAQI(low25);
                     
                     document.getElementById('in-aqi').innerText = inAQI;
-                    document.getElementById('in-pm25').innerHTML = Math.round(low25) + '<span class="metric-unit">µg/m³</span>';
-                    document.getElementById('in-pm10').innerHTML = Math.round(low10) + '<span class="metric-unit">µg/m³</span>';
+                    document.getElementById('in-pm25').innerHTML = Math.round(low25) + '<span class="metric-unit"> µg/m³</span>';
+                    document.getElementById('in-pm10').innerHTML = Math.round(low10) + '<span class="metric-unit"> µg/m³</span>';
                     
                     const st = document.getElementById('status-text');
                     st.innerText = inAQI <= 15 ? "PRISTINE" : inAQI <= 30 ? "EXCEPTIONAL" : inAQI <= 45 ? "EXCELLENT" : inAQI <= 60 ? "VERY GOOD" : "GOOD";
                 }
  
-                // --- External Google API ---
+                // --- External Data (Google API) ---
                 const gRes = await fetch(`https://airquality.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -211,46 +220,45 @@
                 });
                 const gData = await gRes.json();
                 if (gData && gData.indexes) {
+                    // Force find India CPCB or Local index to ensure it's not the Universal index
                     const localIdx = gData.indexes.find(i => i.code === 'ind_cpcb') || gData.indexes[0];
                     outAQI = localIdx.aqi;
                     document.getElementById('out-aqi').innerText = outAQI;
                     
                     const pm25 = gData.pollutants.find(p => p.code === 'pm25');
                     const pm10 = gData.pollutants.find(p => p.code === 'pm10');
-                    if (pm25) document.getElementById('out-pm25').innerHTML = Math.round(pm25.concentration.value) + '<span class="metric-unit">µg/m³</span>';
-                    if (pm10) document.getElementById('out-pm10').innerHTML = Math.round(pm10.concentration.value) + '<span class="metric-unit">µg/m³</span>';
+                    if (pm25) document.getElementById('out-pm25').innerHTML = Math.round(pm25.concentration.value) + '<span class="metric-unit"> µg/m³</span>';
+                    if (pm10) document.getElementById('out-pm10').innerHTML = Math.round(pm10.concentration.value) + '<span class="metric-unit"> µg/m³</span>';
                 }
  
                 // --- TRIGGER LOGIC ---
                 const overlay = document.getElementById('video-overlay');
                 const video = document.getElementById('warning-video');
-                const mainUI = document.getElementById('main-ui');
+                const dashboard = document.getElementById('dashboard-wrapper');
                 const extCard = document.getElementById('external-card');
- 
-                if (inAQI > 50) {
-                    // Video Trigger
+                const intCard = document.getElementById('internal-card');
+                if (inAQI > 100) { // Changed to 50 for testing, change back to 100 if needed
                     overlay.style.display = 'block';
-                    mainUI.style.display = 'none';
-                    video.play();
+                    dashboard.style.display = 'none';
+                    video.muted = true;
+                    video.load(); // Refresh video state
+                    video.play().catch(e => console.log("Autoplay blocked", e));
                 } else {
-                    // Normal Dashboard Mode
                     overlay.style.display = 'none';
-                    mainUI.style.display = 'flex';
+                    dashboard.style.display = 'flex';
                     video.pause();
                     video.currentTime = 0;
- 
-                    // Comparison Logic
                     const diff = Math.abs(outAQI - inAQI);
-                    if (diff > 50) {
-                        extCard.classList.remove('hidden-card');
+                    if (diff < 50) {
+                        intCard.classList.remove('hidden');
+                        extCard.classList.add('hidden');
                     } else {
-                        extCard.classList.add('hidden-card');
+                        intCard.classList.remove('hidden');
+                        extCard.classList.remove('hidden');
                     }
                 }
- 
             } catch (e) { console.error(e); }
         }
- 
         updateData();
         setInterval(updateData, 300000); 
     </script>
